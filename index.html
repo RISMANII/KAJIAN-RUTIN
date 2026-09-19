@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kajian Remaja - Masjid Nurul Ilmi</title>
+    <meta property="og:title" content="Kajian Remaja - Masjid Nurul Ilmi">
+    <meta name="theme-color" content="#0b3d40">
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0b3d40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            font-family: system-ui, sans-serif;
+            color: #fff
+        }
+
+        #wrap {
+            width: 100%;
+            max-width: 520px;
+            text-align: center
+        }
+
+        #flyer {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+            display: none
+        }
+
+        .btn {
+            display: none;
+            margin: 12px 0;
+            padding: 12px 24px;
+            background: #1a9088;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold
+        }
+
+        #msg {
+            margin-top: 38vh;
+            opacity: .85
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrap">
+        <p id="msg">Memuat flyer...</p>
+        <a id="open" target="_blank" rel="noopener"><img id="flyer" alt="Flyer Kajian Remaja"></a>
+        <a id="dl" class="btn" target="_blank" rel="noopener">Simpan Flyer</a>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxdzHa0tN2Rep8SdAcAaihwAHsNzA5ypYBEFBCL9FNCwzrzebz2ycaQVLFBqunie75O/exec'; // URL web app GAS (/exec)
+        const CACHE_KEY = 'flyer_latest';
+        const $ = id => document.getElementById(id);
+
+        function tampil(d) {
+            const main = 'https://lh3.googleusercontent.com/d/' + d.id + '=w1600?t=' + d.updated;
+            const alt = 'https://drive.google.com/thumbnail?id=' + d.id + '&sz=w1600&t=' + d.updated;
+            const img = $('flyer');
+            let tried = false;
+
+            img.onload = () => {
+                $('msg').style.display = 'none';
+                img.style.display = 'block';
+                $('dl').style.display = 'inline-block';
+            };
+            img.onerror = () => {
+                if (!tried) { tried = true; img.src = alt; }
+                else if (img.style.display !== 'block') $('msg').textContent = 'Gagal memuat flyer. Coba lagi.';
+            };
+            img.src = main;
+
+            $('open').href = 'https://drive.google.com/uc?export=view&id=' + d.id;
+            $('dl').href = 'https://drive.google.com/uc?export=download&id=' + d.id;
+        }
+
+        // tampilkan cache dulu biar cepat, lalu cek yang terbaru
+        try {
+            const c = JSON.parse(localStorage.getItem(CACHE_KEY));
+            if (c && c.id) tampil(c);
+        } catch (e) { }
+
+        fetch(API_URL)
+            .then(r => r.json())
+            .then(d => {
+                if (!d.ok) { $('msg').textContent = d.msg || 'Flyer belum tersedia.'; return; }
+                let same = false;
+                try {
+                    const c = JSON.parse(localStorage.getItem(CACHE_KEY));
+                    same = c && c.id === d.id && c.updated === d.updated;
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(d));
+                } catch (e) { }
+                if (!same) tampil(d);
+            })
+            .catch(() => {
+                if ($('flyer').style.display !== 'block') $('msg').textContent = 'Gagal memuat flyer. Coba lagi.';
+            });
+    </script>
+</body>
+
+</html>
