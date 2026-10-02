@@ -51,33 +51,9 @@
 
         #msg {
             margin-top: 38vh;
-            opacity: .85
-            font-weight: bold;
+            opacity: .85 font-weight: bold;
         }
     </style>
-    <!-- TAMBAHAN:START (css) -->
-    <style>
-        #extra { width: 100%; max-width: 520px; text-align: left }
-        .x-sec { background: rgba(255, 255, 255, .07); border-radius: 10px; padding: 14px; margin: 14px 0; box-shadow: 0 4px 20px rgba(0, 0, 0, .25) }
-        .x-sec h2 { margin: 0 0 8px; font-size: 17px; letter-spacing: .5px; text-align: center }
-        .x-sec p { margin: 6px 0; font-size: 14px; line-height: 1.5; opacity: .9; white-space: pre-line }
-        .x-meta { font-size: 13px; opacity: .85; margin: 3px 0 }
-        .x-btn { display: inline-block; margin: 10px 0 0; padding: 10px 20px; background: #1a9088; color: #fff; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px }
-        .x-c { text-align: center }
-        .x-item { border-top: 1px solid rgba(255, 255, 255, .12); padding: 10px 0 }
-        .x-item:first-of-type { border-top: 0 }
-        .x-item b { font-size: 15px }
-        .x-alb { margin: 10px 0 }
-        .x-alb h3 { margin: 0 0 6px; font-size: 14px }
-        .x-alb small { opacity: .75; font-weight: normal }
-        .x-gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px }
-        .x-gal img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; display: block; cursor: pointer; background: #072a2c }
-        .x-foot { text-align: center; font-size: 13px; opacity: .9; padding: 14px 0 20px }
-        .x-foot a { color: #fff; margin: 0 8px; text-decoration: underline }
-        #xlb { position: fixed; inset: 0; background: rgba(0, 0, 0, .88); display: none; align-items: center; justify-content: center; z-index: 50; padding: 12px }
-        #xlb img { max-width: 100%; max-height: 100%; border-radius: 8px }
-    </style>
-    <!-- TAMBAHAN:END (css) -->
 </head>
 
 <body>
@@ -87,13 +63,8 @@
         <a id="dl" class="btn" target="_blank" rel="noopener">Simpan Flyer</a>
     </div>
 
-    <!-- TAMBAHAN:START (html) -->
-    <div id="extra"></div>
-    <div id="xlb"><img alt=""></div>
-    <!-- TAMBAHAN:END (html) -->
-
     <script>
-        const API_URL = '{"ok":true,"id":"1gkXH7ml_zvZ2DBdFiKpFBxv6DsXJFgDT","name":"KAJIAN PEMUDA SEPTEMBER 2026 A4 PNGGGG.png","updated":1789973738000}'; // URL web app GAS (/exec)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzKUd8Z3UpmXAD8lFE5OEYpXnyiljDtAi6NJI4EUm1iUHvIrJMMQEZKIxnKlVsN9Hgc/exec'; // URL web app GAS (/exec)
         const CACHE_KEY = 'flyer_latest';
         const $ = id => document.getElementById(id);
 
@@ -140,70 +111,6 @@
                 if ($('flyer').style.display !== 'block') $('msg').textContent = 'Gagal memuat flyer. Coba lagi.';
             });
     </script>
-    <!-- TAMBAHAN:START (js) -->
-    <script>
-        (function () {
-            const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-            const url = u => /^https?:\/\//i.test(u || '') ? esc(u) : '';
-            const fd = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : (s || ''); };
-            const ft = s => /^\d{1,2}:\d{2}$/.test(s || '') ? s.replace(':', '.') + ' WIB' : (s || '');
-            const img = (fid, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(fid) + '=w' + w;
-            const meta = (d, t, l) => [d && fd(d), t && ft(t), l].filter(Boolean).map(x => '<div class="x-meta">' + esc(x) + '</div>').join('');
-
-            function render(d) {
-                const st = d.settings || {}; let h = '';
-
-                if (st.event_active === 'TRUE' && st.event_title) {
-                    h += '<section class="x-sec"><h2>' + esc(st.event_title) + '</h2>' +
-                        (st.event_desc ? '<p>' + esc(st.event_desc) + '</p>' : '') +
-                        meta(st.event_date, st.event_time, st.event_location) +
-                        (st.event_info ? '<p>' + esc(st.event_info) + '</p>' : '') +
-                        (url(st.event_reg_url) ? '<div class="x-c"><a class="x-btn" target="_blank" rel="noopener" href="' + url(st.event_reg_url) + '">Daftar</a></div>' : '') +
-                        '</section>';
-                }
-
-                const w = d.workshop;
-                if (w && (w.title || w.description)) {
-                    h += '<section class="x-sec"><h2>' + esc(w.title || 'WORKSHOP PEMUDA') + '</h2>' +
-                        (w.description ? '<p>' + esc(w.description) + '</p>' : '') +
-                        meta(w.date, w.time, w.location) +
-                        (url(w.registration_url) ? '<div class="x-c"><a class="x-btn" target="_blank" rel="noopener" href="' + url(w.registration_url) + '">Daftar Workshop</a></div>' : '') +
-                        '</section>';
-                }
-
-                if (d.kegiatan && d.kegiatan.length) {
-                    h += '<section class="x-sec"><h2>JADWAL KEGIATAN</h2>' + d.kegiatan.map(k =>
-                        '<div class="x-item"><b>' + esc(k.title) + '</b>' + meta(k.date, k.time, k.location) +
-                        (k.description ? '<p>' + esc(k.description) + '</p>' : '') + '</div>').join('') + '</section>';
-                }
-
-                if (d.dokumentasi && d.dokumentasi.length) {
-                    h += '<section class="x-sec"><h2>DOKUMENTASI</h2>' + d.dokumentasi.map(a =>
-                        '<div class="x-alb"><h3>' + esc(a.title) + (a.date ? ' <small>• ' + esc(fd(a.date)) + '</small>' : '') + '</h3><div class="x-gal">' +
-                        a.photos.map(p => '<img loading="lazy" alt="' + esc(a.title) + '" src="' + img(p.fid, 500) + '" data-big="' + img(p.fid, 1600) + '">').join('') +
-                        '</div></div>').join('') + '</section>';
-                }
-
-                const links = [];
-                if (st.instagram) links.push('<a target="_blank" rel="noopener" href="' + (/^https?:/i.test(st.instagram) ? url(st.instagram) : 'https://instagram.com/' + encodeURIComponent(st.instagram.replace(/^@/, ''))) + '">Instagram</a>');
-                if (st.whatsapp) { const n = st.whatsapp.replace(/\D/g, '').replace(/^0/, '62'); if (n) links.push('<a target="_blank" rel="noopener" href="https://wa.me/' + n + '">WhatsApp</a>'); }
-                if (url(st.social_link)) links.push('<a target="_blank" rel="noopener" href="' + url(st.social_link) + '">Link</a>');
-                if (st.location) links.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(st.location) + '">Lokasi</a>');
-                if (links.length) h += '<footer class="x-foot">' + (st.location ? '<div>' + esc(st.location) + '</div>' : '') + '<div style="margin-top:6px">' + links.join('') + '</div></footer>';
-
-                document.getElementById('extra').innerHTML = h;
-            }
-
-            document.getElementById('extra').addEventListener('click', e => {
-                const b = e.target.dataset && e.target.dataset.big; if (!b) return;
-                const lb = document.getElementById('xlb'); lb.firstElementChild.src = b; lb.style.display = 'flex';
-            });
-            document.getElementById('xlb').onclick = function () { this.style.display = 'none'; this.firstElementChild.src = ''; };
-
-            fetch(API_URL + '?action=public').then(r => r.json()).then(d => { if (d && d.ok) render(d); }).catch(() => { });
-        })();
-    </script>
-    <!-- TAMBAHAN:END (js) -->
 </body>
 
 </html>
