@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="theme-color" content="#0b3d40">
+    <title>Admin - Kajian Remaja</title>
+    <style>
+        * { box-sizing: border-box }
+        body { margin: 0; min-height: 100vh; background: #0b3d40; display: flex; flex-direction: column; align-items: center; padding: 8px; font-family: system-ui, sans-serif; color: #fff }
+        #app { width: 100%; max-width: 760px }
+        .card { background: rgba(255, 255, 255, .07); border-radius: 10px; padding: 14px; margin: 10px 0; box-shadow: 0 4px 20px rgba(0, 0, 0, .25) }
+        h1 { font-size: 20px; margin: 6px 0; text-align: center }
+        h2 { font-size: 16px; margin: 0 0 10px; letter-spacing: .5px }
+        h3 { font-size: 14px; margin: 14px 0 8px; opacity: .9 }
+        label { display: block; font-size: 12px; opacity: .85; margin: 8px 0 3px }
+        input[type=text], input[type=password], input[type=date], input[type=time], input[type=url], textarea {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .25); color: #fff; font: inherit; font-size: 14px }
+        input[type=file] { width: 100%; font-size: 13px; color: #fff }
+        textarea { min-height: 80px; resize: vertical }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+        .chk { display: flex; align-items: center; gap: 8px; margin: 10px 0; font-size: 14px; opacity: 1 }
+        .btn { display: inline-block; margin: 8px 6px 0 0; padding: 10px 18px; background: #1a9088; color: #fff; border: 0; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer }
+        .btn.sec { background: rgba(255, 255, 255, .15) }
+        .btn.del { background: #b3413b }
+        .btn.sm { padding: 6px 10px; font-size: 12px; margin: 6px 4px 0 0 }
+        .btn:disabled { opacity: .5; cursor: wait }
+        nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 }
+        nav button { flex: 1 1 auto }
+        nav button.on { background: #1a9088 }
+        .panel { display: none }
+        .panel.on { display: block }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px }
+        .it { background: rgba(0, 0, 0, .2); border-radius: 8px; padding: 6px; text-align: center; font-size: 12px }
+        .it img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; display: block; background: #072a2c }
+        .it.off img { opacity: .35 }
+        .badge { display: inline-block; background: #1a9088; border-radius: 99px; padding: 2px 8px; font-size: 11px; font-weight: bold; margin-top: 4px }
+        .prev { width: 100%; max-width: 260px; border-radius: 10px; display: block; margin: 0 auto 8px }
+        .err { color: #ffb4ae; font-size: 13px; min-height: 18px; margin-top: 8px }
+        .keg { background: rgba(0, 0, 0, .2); border-radius: 8px; padding: 10px; margin: 8px 0; font-size: 14px }
+        .keg small { opacity: .8; display: block }
+        .top { display: flex; justify-content: space-between; align-items: center; gap: 8px }
+        #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #1a9088; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 14px; display: none; z-index: 9; max-width: 90% }
+        #toast.bad { background: #b3413b }
+        @media(max-width:480px) { .row { grid-template-columns: 1fr } }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- LOGIN -->
+        <div id="vLogin" class="card" style="max-width:380px;margin:12vh auto 0">
+            <h1>Admin Kajian Remaja</h1>
+            <label>Username</label>
+            <input type="text" id="lu" autocomplete="username" autocapitalize="none">
+            <label>Password</label>
+            <input type="password" id="lp" autocomplete="current-password">
+            <div class="err" id="le"></div>
+            <button class="btn" id="lb" style="width:100%;margin:6px 0 0">Masuk</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="vDash" style="display:none">
+            <div class="top"><h1 style="text-align:left;margin:6px 0">Dashboard Admin</h1><span id="who" style="font-size:12px;opacity:.8"></span></div>
+            <nav id="nav">
+                <button class="btn sec on" data-p="pFlyer">Kelola Flyer</button>
+                <button class="btn sec" data-p="pDok">Kelola Dokumentasi</button>
+                <button class="btn sec" data-p="pInfo">Kelola Informasi Website</button>
+                <button class="btn sec" data-p="pKeg">Kelola Kegiatan</button>
+                <button class="btn del" id="logout">Logout</button>
+            </nav>
+
+            <!-- FLYER -->
+            <div class="panel on card" id="pFlyer">
+                <h2>Flyer Tampil Saat Ini</h2>
+                <img id="fPrev" class="prev" alt="" style="display:none">
+                <h3>Upload Flyer Baru</h3>
+                <input type="file" id="fFile" accept="image/*">
+                <label class="chk"><input type="checkbox" id="fAct" checked> Jadikan flyer aktif</label>
+                <button class="btn" id="fUp">Upload</button>
+                <h3>Semua Flyer</h3>
+                <div class="grid" id="fList"></div>
+            </div>
+
+            <!-- DOKUMENTASI -->
+            <div class="panel card" id="pDok">
+                <h2>Tambah Dokumentasi</h2>
+                <label>Judul kegiatan</label><input type="text" id="dT">
+                <label>Tanggal kegiatan</label><input type="date" id="dD">
+                <label>Foto (boleh pilih banyak)</label><input type="file" id="dF" accept="image/*" multiple>
+                <button class="btn" id="dUp">Upload Foto</button>
+                <div class="err" id="dMsg" style="color:#cfeee9"></div>
+                <h3>Album Dokumentasi</h3>
+                <div id="dList"></div>
+            </div>
+
+            <!-- INFO WEBSITE -->
+            <div class="panel card" id="pInfo">
+                <h2>Info Kegiatan Utama</h2>
+                <label>Judul kegiatan</label><input type="text" id="s_event_title">
+                <label>Deskripsi</label><textarea id="s_event_desc"></textarea>
+                <div class="row">
+                    <div><label>Tanggal</label><input type="date" id="s_event_date"></div>
+                    <div><label>Jam</label><input type="time" id="s_event_time"></div>
+                </div>
+                <label>Lokasi</label><input type="text" id="s_event_location">
+                <label>Link pendaftaran</label><input type="url" id="s_event_reg_url" placeholder="https://">
+                <label>Informasi tambahan</label><textarea id="s_event_info"></textarea>
+                <label class="chk"><input type="checkbox" id="s_event_active"> Aktif (tampil di website)</label>
+                <button class="btn" data-save="event">Simpan Info Kegiatan</button>
+
+                <h2 style="margin-top:22px">Workshop Pemuda</h2>
+                <label>Judul workshop</label><input type="text" id="w_title">
+                <label>Deskripsi</label><textarea id="w_description"></textarea>
+                <div class="row">
+                    <div><label>Tanggal</label><input type="date" id="w_date"></div>
+                    <div><label>Jam</label><input type="time" id="w_time"></div>
+                </div>
+                <label>Lokasi</label><input type="text" id="w_location">
+                <label>Link Google Form</label><input type="url" id="w_registration_url" placeholder="https://">
+                <label class="chk"><input type="checkbox" id="w_active"> Tampilkan di website</label>
+                <button class="btn" data-save="workshop">Simpan Workshop</button>
+
+                <h2 style="margin-top:22px">Footer / Kontak</h2>
+                <label>Instagram (@username atau link)</label><input type="text" id="s_instagram">
+                <label>WhatsApp (contoh 08123456789)</label><input type="text" id="s_whatsapp">
+                <label>Lokasi</label><input type="text" id="s_location">
+                <label>Link sosial media lain</label><input type="url" id="s_social_link" placeholder="https://">
+                <button class="btn" data-save="footer">Simpan Footer</button>
+
+                <h2 style="margin-top:22px">Ganti Password</h2>
+                <label>Password lama</label><input type="password" id="pwOld" autocomplete="current-password">
+                <label>Password baru (min 8 karakter)</label><input type="password" id="pwNew" autocomplete="new-password">
+                <button class="btn sec" id="pwBtn">Ganti Password</button>
+            </div>
+
+            <!-- KEGIATAN -->
+            <div class="panel card" id="pKeg">
+                <h2 id="kHead">Tambah Kegiatan</h2>
+                <label>Nama kegiatan</label><input type="text" id="k_title">
+                <div class="row">
+                    <div><label>Tanggal</label><input type="date" id="k_date"></div>
+                    <div><label>Jam</label><input type="time" id="k_time"></div>
+                </div>
+                <label>Lokasi</label><input type="text" id="k_location">
+                <label>Deskripsi (opsional)</label><textarea id="k_description" style="min-height:60px"></textarea>
+                <label class="chk"><input type="checkbox" id="k_active" checked> Tampilkan di website</label>
+                <button class="btn" id="kSave">Simpan Kegiatan</button>
+                <button class="btn sec" id="kCancel" style="display:none">Batal Edit</button>
+                <h3>Daftar Kegiatan</h3>
+                <div id="kList"></div>
+            </div>
+        </div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxdzHa0tN2Rep8SdAcAaihwAHsNzA5ypYBEFBCL9FNCwzrzebz2ycaQVLFBqunie75O/exec';
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const TK = 'adm_token';
+        let D = null, editId = null;
+
+        function toast(m, bad) {
+            const t = $('toast'); t.textContent = m; t.className = bad ? 'bad' : ''; t.style.display = 'block';
+            clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 2800);
+        }
+
+        async function api(action, data) {
+            const body = Object.assign({ action, token: sessionStorage.getItem(TK) }, data || {});
+            const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+            const j = await r.json();
+            if (j.code === 'AUTH') { keluar(true); throw new Error(j.msg); }
+            if (!j.ok) throw new Error(j.msg || 'Gagal');
+            return j;
+        }
+
+        function showDash(on) {
+            $('vLogin').style.display = on ? 'none' : 'block';
+            $('vDash').style.display = on ? 'block' : 'none';
+        }
+        function keluar(silent) {
+            sessionStorage.removeItem(TK); D = null; showDash(false);
+            if (silent) $('le').textContent = 'Sesi habis, silakan login ulang.';
+        }
+
+        /* ---------- LOGIN ---------- */
+        async function doLogin() {
+            const b = $('lb'); b.disabled = true; $('le').textContent = '';
+            try {
+                const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'login', username: $('lu').value, password: $('lp').value }) });
+                const j = await r.json();
+                if (!j.ok) throw new Error(j.msg);
+                sessionStorage.setItem(TK, j.token); $('lp').value = ''; $('who').textContent = j.user;
+                await muat(); showDash(true);
+            } catch (e) { $('le').textContent = e.message || 'Gagal login'; }
+            b.disabled = false;
+        }
+        $('lb').onclick = doLogin;
+        $('lp').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+        $('logout').onclick = async () => { try { await api('logout'); } catch (e) { } keluar(); };
+
+        async function muat() { D = await api('adminData'); render(); }
+
+        /* ---------- NAV ---------- */
+        $('nav').onclick = e => {
+            const p = e.target.dataset && e.target.dataset.p; if (!p) return;
+            document.querySelectorAll('#nav button[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === p));
+            document.querySelectorAll('.panel').forEach(x => x.classList.toggle('on', x.id === p));
+        };
+
+        /* ---------- RENDER ---------- */
+        const thumb = (fid, w) => 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(fid) + '=w' + (w || 400);
+        const fd = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : (s || ''); };
+
+        function render() {
+            // flyer
+            const act = D.flyers.filter(f => f.active === 'TRUE')[0];
+            $('fPrev').style.display = act ? 'block' : 'none';
+            if (act) $('fPrev').src = thumb(act.drive_file_id, 600);
+            $('fList').innerHTML = D.flyers.map(f => `<div class="it ${f.active === 'TRUE' ? '' : 'off'}">
+                <img loading="lazy" src="${thumb(f.drive_file_id, 300)}" alt="">
+                ${f.active === 'TRUE' ? '<span class="badge">AKTIF</span>' : `<button class="btn sm" data-fa="${esc(f.id)}">Aktifkan</button>`}
+                <button class="btn sm del" data-fd="${esc(f.id)}">Hapus</button></div>`).join('') || '<small>Belum ada flyer.</small>';
+
+            // dokumentasi
+            const g = {}, ord = [];
+            D.dokumentasi.forEach(r => { if (!g[r.group_id]) { g[r.group_id] = { id: r.group_id, title: r.title, date: r.date, p: [] }; ord.push(r.group_id); } g[r.group_id].p.push(r); });
+            ord.sort((a, b) => (g[b].date || '').localeCompare(g[a].date || ''));
+            $('dList').innerHTML = ord.map(id => { const a = g[id]; return `<div class="keg" data-g="${esc(id)}">
+                <label>Judul</label><input type="text" class="gt" value="${esc(a.title)}">
+                <label>Tanggal</label><input type="date" class="gd" value="${esc(a.date)}">
+                <button class="btn sm" data-gs="${esc(id)}">Simpan Judul/Tanggal</button>
+                <button class="btn sm del" data-gx="${esc(id)}">Hapus Album</button>
+                <div class="grid" style="margin-top:8px">${a.p.map(p => `<div class="it ${p.active === 'TRUE' ? '' : 'off'}">
+                    <img loading="lazy" src="${thumb(p.drive_file_id, 300)}" alt="">
+                    <button class="btn sm sec" data-dt="${esc(p.id)}" data-v="${p.active === 'TRUE' ? 0 : 1}">${p.active === 'TRUE' ? 'Sembunyikan' : 'Tampilkan'}</button>
+                    <button class="btn sm del" data-dx="${esc(p.id)}">Hapus</button></div>`).join('')}</div></div>`; }).join('') || '<small>Belum ada dokumentasi.</small>';
+
+            // settings
+            const s = D.settings || {};
+            ['event_title', 'event_desc', 'event_date', 'event_time', 'event_location', 'event_reg_url', 'event_info', 'instagram', 'whatsapp', 'location', 'social_link']
+                .forEach(k => { if (document.activeElement !== $('s_' + k)) $('s_' + k).value = s[k] || ''; });
+            $('s_event_active').checked = s.event_active === 'TRUE';
+            const w = D.workshop || {};
+            ['title', 'description', 'date', 'time', 'location', 'registration_url'].forEach(k => $('w_' + k).value = w[k] || '');
+            $('w_active').checked = w.active === 'TRUE';
+
+            // kegiatan
+            $('kList').innerHTML = D.kegiatan.map(k => `<div class="keg"><b>${esc(k.title)}</b>
+                <small>${esc(fd(k.date))} ${esc(k.time)} ${k.location ? '• ' + esc(k.location) : ''}</small>
+                <small>${k.active === 'TRUE' ? 'Tampil' : 'Disembunyikan'}</small>
+                <button class="btn sm" data-ke="${esc(k.id)}">Edit</button>
+                <button class="btn sm sec" data-kt="${esc(k.id)}">${k.active === 'TRUE' ? 'Sembunyikan' : 'Tampilkan'}</button>
+                <button class="btn sm del" data-kx="${esc(k.id)}">Hapus</button></div>`).join('') || '<small>Belum ada kegiatan.</small>';
+        }
+
+        async function jalan(btn, fn, ok) {
+            if (btn) btn.disabled = true;
+            try { await fn(); if (ok) toast(ok); } catch (e) { toast(e.message || 'Gagal', true); }
+            if (btn) btn.disabled = false;
+        }
+
+        /* ---------- GAMBAR ---------- */
+        function siap(file, max) {
+            return new Promise((res, rej) => {
+                const img = new Image(), u = URL.createObjectURL(file);
+                img.onload = () => {
+                    const s = Math.min(1, max / Math.max(img.width, img.height));
+                    const w = Math.round(img.width * s), h = Math.round(img.height * s);
+                    const c = document.createElement('canvas'); c.width = w; c.height = h;
+                    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(u);
+                    res({ mime: 'image/jpeg', data: c.toDataURL('image/jpeg', .88).split(',')[1] });
+                };
+                img.onerror = () => rej(new Error('Gagal membaca gambar'));
+                img.src = u;
+            });
+        }
+
+        /* ---------- FLYER ---------- */
+        $('fUp').onclick = e => jalan(e.target, async () => {
+            const f = $('fFile').files[0]; if (!f) throw new Error('Pilih gambar dulu');
+            const im = await siap(f, 2000);
+            await api('flyerUpload', { mime: im.mime, data: im.data, title: f.name, active: $('fAct').checked });
+            $('fFile').value = ''; await muat();
+        }, 'Flyer terupload');
+        $('fList').onclick = e => {
+            const a = e.target.dataset.fa, d = e.target.dataset.fd;
+            if (a) jalan(e.target, async () => { await api('flyerSetActive', { id: a }); await muat(); }, 'Flyer diaktifkan');
+            if (d && confirm('Hapus flyer ini?')) jalan(e.target, async () => { await api('flyerDelete', { id: d }); await muat(); }, 'Flyer dihapus');
+        };
+
+        /* ---------- DOKUMENTASI ---------- */
+        $('dUp').onclick = e => jalan(e.target, async () => {
+            const files = [...$('dF').files]; if (!files.length) throw new Error('Pilih foto dulu');
+            if (!$('dT').value.trim()) throw new Error('Isi judul kegiatan');
+            let gid = 'g' + Date.now().toString(36);
+            for (let i = 0; i < files.length; i++) {
+                $('dMsg').textContent = 'Upload ' + (i + 1) + '/' + files.length + '...';
+                const im = await siap(files[i], 1600);
+                await api('dokUpload', { group_id: gid, title: $('dT').value.trim(), date: $('dD').value, mime: im.mime, data: im.data });
+            }
+            $('dMsg').textContent = ''; $('dF').value = ''; await muat();
+        }, 'Dokumentasi terupload');
+        $('dList').onclick = e => {
+            const t = e.target.dataset, b = e.target;
+            if (t.dt) jalan(b, async () => { await api('dokToggle', { id: t.dt, active: t.v === '1' }); await muat(); });
+            if (t.dx && confirm('Hapus foto ini?')) jalan(b, async () => { await api('dokDelete', { id: t.dx }); await muat(); }, 'Foto dihapus');
+            if (t.gx && confirm('Hapus seluruh album beserta fotonya?')) jalan(b, async () => { await api('dokGroupDelete', { group_id: t.gx }); await muat(); }, 'Album dihapus');
+            if (t.gs) jalan(b, async () => {
+                const box = b.closest('[data-g]');
+                await api('dokGroupUpdate', { group_id: t.gs, title: box.querySelector('.gt').value, date: box.querySelector('.gd').value }); await muat();
+            }, 'Tersimpan');
+        };
+
+        /* ---------- INFO WEBSITE ---------- */
+        const GRP = {
+            event: ['event_title', 'event_desc', 'event_date', 'event_time', 'event_location', 'event_reg_url', 'event_info'],
+            footer: ['instagram', 'whatsapp', 'location', 'social_link']
+        };
+        document.querySelectorAll('[data-save]').forEach(b => b.onclick = () => jalan(b, async () => {
+            const g = b.dataset.save;
+            if (g === 'workshop') {
+                const item = { active: $('w_active').checked };
+                ['title', 'description', 'date', 'time', 'location', 'registration_url'].forEach(k => item[k] = $('w_' + k).value);
+                await api('workshopSave', { item });
+            } else {
+                const values = {}; GRP[g].forEach(k => values[k] = $('s_' + k).value);
+                if (g === 'event') values.event_active = $('s_event_active').checked;
+                await api('settingsSave', { values });
+            }
+            await muat();
+        }, 'Tersimpan'));
+        $('pwBtn').onclick = e => jalan(e.target, async () => {
+            await api('changePassword', { old: $('pwOld').value, new: $('pwNew').value });
+            $('pwOld').value = ''; $('pwNew').value = '';
+        }, 'Password diganti');
+
+        /* ---------- KEGIATAN ---------- */
+        const KF = ['title', 'date', 'time', 'location', 'description'];
+        function resetK() {
+            editId = null; KF.forEach(k => $('k_' + k).value = ''); $('k_active').checked = true;
+            $('kHead').textContent = 'Tambah Kegiatan'; $('kCancel').style.display = 'none';
+        }
+        $('kCancel').onclick = resetK;
+        $('kSave').onclick = e => jalan(e.target, async () => {
+            const item = { id: editId, active: $('k_active').checked };
+            KF.forEach(k => item[k] = $('k_' + k).value);
+            await api('kegiatanSave', { item }); resetK(); await muat();
+        }, 'Kegiatan tersimpan');
+        $('kList').onclick = e => {
+            const t = e.target.dataset, b = e.target;
+            const row = id => D.kegiatan.filter(k => k.id === id)[0];
+            if (t.ke) {
+                const k = row(t.ke); editId = k.id; KF.forEach(f => $('k_' + f).value = k[f] || '');
+                $('k_active').checked = k.active === 'TRUE'; $('kHead').textContent = 'Edit Kegiatan'; $('kCancel').style.display = 'inline-block';
+                $('kHead').scrollIntoView({ behavior: 'smooth' });
+            }
+            if (t.kt) jalan(b, async () => { const k = row(t.kt); await api('kegiatanSave', { item: Object.assign({}, k, { active: k.active !== 'TRUE' }) }); await muat(); });
+            if (t.kx && confirm('Hapus kegiatan ini?')) jalan(b, async () => { await api('kegiatanDelete', { id: t.kx }); await muat(); }, 'Kegiatan dihapus');
+        };
+
+        /* ---------- INIT ---------- */
+        (async () => {
+            if (!sessionStorage.getItem(TK)) return;
+            try { await api('me'); await muat(); showDash(true); } catch (e) { keluar(); }
+        })();
+    </script>
+</body>
+
+</html>
